@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import {
   Settings as SettingsIcon, Palette, Globe, Building2, Bell, Shield,
   Database, Receipt, WarehouseIcon, CircleDollarSign, ShoppingCart,
-  UserCog, Landmark, Save, Check, FileCode2, Link2, CheckCircle2, XCircle, AlertCircle
+  UserCog, Landmark, Save, Check, FileCode2, Link2, CheckCircle2, XCircle, AlertCircle, Trash2
 } from "lucide-react";
 import BackupPanel from "@/components/settings/BackupPanel";
 import PrintersManager from "@/components/pos/PrintersManager";
@@ -102,6 +102,8 @@ export default function Settings() {
   const [activeTab, setActiveTab] = useState("general");
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [saved, setSaved] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
 
   useEffect(() => {
     try {
@@ -350,6 +352,68 @@ export default function Settings() {
                 </div>
               ))}
             </div>
+
+            {/* Account Deletion */}
+            <div className="mt-6 pt-4 border-t border-destructive/20">
+              <SectionHeader title="منطقة الخطر" desc="إجراءات لا يمكن التراجع عنها" />
+              <div className="flex items-start justify-between p-4 rounded-xl border border-destructive/30 bg-destructive/5">
+                <div>
+                  <p className="font-medium text-sm text-destructive">حذف الحساب</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">سيتم حذف جميع بياناتك بشكل نهائي ولا يمكن استعادتها.</p>
+                </div>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="gap-1.5 shrink-0"
+                  onClick={() => { setDeleteConfirmText(""); setShowDeleteDialog(true); }}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  حذف الحساب
+                </Button>
+              </div>
+            </div>
+
+            {/* Delete confirmation dialog */}
+            {showDeleteDialog && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+                <div className="bg-card rounded-2xl shadow-2xl w-full max-w-sm p-6 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-destructive/10 flex items-center justify-center">
+                      <Trash2 className="h-5 w-5 text-destructive" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-base">تأكيد حذف الحساب</h3>
+                      <p className="text-xs text-muted-foreground">هذا الإجراء لا يمكن التراجع عنه</p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    لتأكيد الحذف، اكتب <strong className="text-foreground">حذف</strong> في الحقل أدناه:
+                  </p>
+                  <input
+                    className="w-full h-9 px-3 rounded-md border border-input bg-transparent text-sm select-text"
+                    placeholder='اكتب "حذف" للتأكيد'
+                    value={deleteConfirmText}
+                    onChange={e => setDeleteConfirmText(e.target.value)}
+                  />
+                  <div className="flex gap-2 justify-end">
+                    <Button variant="outline" size="sm" onClick={() => setShowDeleteDialog(false)}>
+                      إلغاء
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      disabled={deleteConfirmText !== "حذف"}
+                      onClick={() => {
+                        setShowDeleteDialog(false);
+                        base44.auth.logout("/");
+                      }}
+                    >
+                      تأكيد الحذف
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         );
 

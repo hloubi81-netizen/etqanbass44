@@ -94,18 +94,48 @@ function applyTheme(themeKey) {
 
 export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(() => localStorage.getItem("appTheme") || "blue");
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem("appDarkMode");
+    if (saved !== null) return saved === "true";
+    return window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false;
+  });
 
+  // Apply color theme vars
   useEffect(() => {
     applyTheme(theme);
   }, [theme]);
+
+  // Apply / remove dark class
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", darkMode);
+  }, [darkMode]);
+
+  // Listen for system dark-mode changes (only when user hasn't overridden)
+  useEffect(() => {
+    const mq = window.matchMedia?.("(prefers-color-scheme: dark)");
+    if (!mq) return;
+    const handler = (e) => {
+      if (localStorage.getItem("appDarkMode") === null) {
+        setDarkMode(e.matches);
+      }
+    };
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
 
   function changeTheme(key) {
     setTheme(key);
     localStorage.setItem("appTheme", key);
   }
 
+  function toggleDarkMode(val) {
+    const next = val !== undefined ? val : !darkMode;
+    setDarkMode(next);
+    localStorage.setItem("appDarkMode", String(next));
+  }
+
   return (
-    <ThemeContext.Provider value={{ theme, changeTheme }}>
+    <ThemeContext.Provider value={{ theme, changeTheme, darkMode, toggleDarkMode }}>
       {children}
     </ThemeContext.Provider>
   );

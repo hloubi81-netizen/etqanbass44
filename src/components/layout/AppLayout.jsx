@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
-import { Outlet } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
-import { Menu, Bell, ChevronDown } from "lucide-react";
+import MobileNav from "./MobileNav";
+import { Menu, Bell, ChevronDown, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLang } from "@/hooks/useLang.jsx";
 import ThemePicker from "./ThemePicker";
@@ -13,24 +14,59 @@ export default function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { lang, toggle } = useLang();
   const [user, setUser] = useState(null);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const prevPathRef = useRef(location.pathname);
+  const [pageClass, setPageClass] = useState("page-enter");
+
+  const isRoot = location.pathname === "/";
 
   useEffect(() => {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
 
+  useEffect(() => {
+    const prev = prevPathRef.current;
+    const curr = location.pathname;
+    if (prev !== curr) {
+      // going "back" if new path is shorter / ancestor
+      const isBack = curr !== "/" && prev.startsWith(curr);
+      setPageClass(isBack ? "page-back" : "page-enter");
+      prevPathRef.current = curr;
+    }
+  }, [location.pathname]);
+
   return (
-    <div className="flex min-h-screen bg-gray-50" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+    <div className="flex min-h-screen bg-gray-50 dark:bg-background" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
       <Sidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
 
       <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
-        {/* Office-style top ribbon */}
-        <header className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
-          {/* Main toolbar */}
+        {/* Top header */}
+        <header className="sticky top-0 z-30 bg-white dark:bg-card border-b border-gray-200 dark:border-border shadow-sm safe-top">
           <div className="flex items-center gap-2 px-4 py-2">
-            {/* Hamburger for mobile */}
+
+            {/* Mobile: Back button or Hamburger */}
+            {!isRoot ? (
+              <button
+                onClick={() => navigate(-1)}
+                className="lg:hidden p-1.5 rounded hover:bg-gray-100 dark:hover:bg-muted text-gray-600 dark:text-muted-foreground"
+                aria-label="رجوع"
+              >
+                <ArrowRight className="h-5 w-5" />
+              </button>
+            ) : (
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="lg:hidden p-1.5 rounded hover:bg-gray-100 dark:hover:bg-muted text-gray-600 dark:text-muted-foreground"
+              >
+                <Menu className="h-5 w-5" />
+              </button>
+            )}
+
+            {/* Desktop hamburger always visible */}
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="lg:hidden p-1.5 rounded hover:bg-gray-100 text-gray-600"
+              className="hidden lg:block p-1.5 rounded hover:bg-gray-100 dark:hover:bg-muted text-gray-600 dark:text-muted-foreground"
             >
               <Menu className="h-5 w-5" />
             </button>
@@ -55,27 +91,27 @@ export default function AppLayout() {
                 variant="ghost"
                 size="sm"
                 onClick={toggle}
-                className="text-xs font-semibold px-2 h-8 text-gray-600 hover:bg-gray-100"
+                className="text-xs font-semibold px-2 h-8 text-gray-600 dark:text-muted-foreground hover:bg-gray-100 dark:hover:bg-muted"
               >
                 <span className="text-sm">{lang === 'ar' ? '🇬🇧' : '🇸🇦'}</span>
                 <span className="hidden sm:inline mr-1">{lang === 'ar' ? 'EN' : 'AR'}</span>
               </Button>
 
-              <button className="relative p-1.5 rounded hover:bg-gray-100 text-gray-500">
-                <Bell className="h-4.5 w-4.5 h-[18px] w-[18px]" />
+              <button className="relative p-1.5 rounded hover:bg-gray-100 dark:hover:bg-muted text-gray-500 dark:text-muted-foreground">
+                <Bell className="h-[18px] w-[18px]" />
               </button>
 
               {/* User pill */}
               {user && (
-                <div className="flex items-center gap-2 px-2 py-1 rounded hover:bg-gray-100 cursor-pointer transition-colors border border-transparent hover:border-gray-200">
+                <div className="flex items-center gap-2 px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-muted cursor-pointer transition-colors border border-transparent hover:border-gray-200 dark:hover:border-border">
                   <div className="h-7 w-7 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
                     {user.full_name?.charAt(0) || user.email?.charAt(0) || "؟"}
                   </div>
                   <div className="hidden sm:block text-right">
-                    <p className="text-xs font-semibold text-gray-700 leading-tight">{user.full_name || "مستخدم"}</p>
-                    <p className="text-[10px] text-gray-400 leading-tight">{user.email}</p>
+                    <p className="text-xs font-semibold text-gray-700 dark:text-foreground leading-tight">{user.full_name || "مستخدم"}</p>
+                    <p className="text-[10px] text-gray-400 dark:text-muted-foreground leading-tight">{user.email}</p>
                   </div>
-                  <ChevronDown className="h-3 w-3 text-gray-400 hidden sm:block" />
+                  <ChevronDown className="h-3 w-3 text-gray-400 dark:text-muted-foreground hidden sm:block" />
                 </div>
               )}
             </div>
@@ -83,9 +119,12 @@ export default function AppLayout() {
         </header>
 
         {/* Main content */}
-        <main className="flex-1 p-4 md:p-6 overflow-auto">
+        <main className={cn("flex-1 p-4 md:p-6 overflow-auto pb-20 lg:pb-6", pageClass)}>
           <Outlet />
         </main>
+
+        {/* Mobile bottom navigation */}
+        <MobileNav />
       </div>
     </div>
   );
