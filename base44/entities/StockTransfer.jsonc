@@ -88,5 +88,68 @@
     "date",
     "from_warehouse_id",
     "to_warehouse_id"
-  ]
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "admin",
+            "inventory",
+            "branch_manager"
+          ]
+        }
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": {
+              "$in": [
+                "admin",
+                "inventory"
+              ]
+            }
+          }
+        },
+        {
+          "data.from_branch_id": "{{user.data.branch_id}}"
+        },
+        {
+          "data.to_branch_id": "{{user.data.branch_id}}"
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": {
+              "$in": [
+                "admin",
+                "inventory"
+              ]
+            }
+          }
+        },
+        {
+          "data.from_branch_id": "{{user.data.branch_id}}"
+        },
+        {
+          "data.to_branch_id": "{{user.data.branch_id}}"
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "admin",
+            "inventory"
+          ]
+        }
+      }
+    }
+  }
 }

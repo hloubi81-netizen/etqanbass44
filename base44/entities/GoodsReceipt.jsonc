@@ -118,5 +118,70 @@
     "receipt_number",
     "purchase_order_id",
     "date"
-  ]
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "admin",
+            "inventory",
+            "branch_manager"
+          ]
+        }
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": {
+              "$in": [
+                "admin",
+                "inventory"
+              ]
+            }
+          }
+        },
+        {
+          "data.warehouse_id": {
+            "$in": [
+              "{{user.data.warehouse_ids}}"
+            ]
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": {
+              "$in": [
+                "admin",
+                "inventory"
+              ]
+            }
+          }
+        },
+        {
+          "data.warehouse_id": {
+            "$in": [
+              "{{user.data.managed_warehouse_ids}}"
+            ]
+          }
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "admin",
+            "inventory"
+          ]
+        }
+      }
+    }
+  }
 }

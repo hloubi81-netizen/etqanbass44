@@ -145,5 +145,62 @@
     "invoice_number",
     "pattern_type",
     "date"
-  ]
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "admin",
+            "accountant",
+            "branch_manager"
+          ]
+        }
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": {
+              "$in": [
+                "admin",
+                "accountant"
+              ]
+            }
+          }
+        },
+        {
+          "data.branch_id": "{{user.data.branch_id}}"
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": {
+              "$in": [
+                "admin",
+                "accountant"
+              ]
+            }
+          }
+        },
+        {
+          "data.branch_id": "{{user.data.branch_id}}"
+        }
+      ]
+    },
+    "delete": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "admin",
+            "accountant"
+          ]
+        }
+      }
+    }
+  }
 }

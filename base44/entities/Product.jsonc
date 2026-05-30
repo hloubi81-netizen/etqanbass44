@@ -125,5 +125,40 @@
   "required": [
     "name",
     "item_code"
-  ]
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "admin",
+            "inventory",
+            "branch_manager"
+          ]
+        }
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "admin",
+            "inventory",
+            "branch_manager"
+          ]
+        }
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": {
+          "$in": [
+            "admin",
+            "inventory"
+          ]
+        }
+      }
+    }
+  }
 }
