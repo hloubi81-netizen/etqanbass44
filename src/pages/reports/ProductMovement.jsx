@@ -28,15 +28,19 @@ export default function ProductMovement() {
   }, []);
 
   async function loadData() {
-    const [p, g, w, inv, tr, curs] = await Promise.all([
+    const [p, g, w] = await Promise.all([
       base44.entities.Product.list(),
       base44.entities.ProductGroup.list(),
       base44.entities.Warehouse.list(),
+    ]);
+    setProducts(p); setGroups(g); setWarehouses(w);
+
+    const [inv, tr, curs] = await Promise.all([
       base44.entities.Invoice.list(),
       base44.entities.StockTransfer.list(),
       base44.entities.Currency.list(),
     ]);
-    setProducts(p); setGroups(g); setWarehouses(w); setInvoices(inv); setTransfers(tr); setCurrencies(curs);
+    setInvoices(inv); setTransfers(tr); setCurrencies(curs);
     setLoading(false);
   }
 
