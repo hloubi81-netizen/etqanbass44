@@ -46,6 +46,13 @@ export default function Products() {
     setDialogOpen(true);
   }
 
+  function openCopy(product) {
+    // نسخ المنتج مع مسح الحقول الفريدة لإجبار المستخدم على تغييرها
+    const { id, created_date, updated_date, created_by, item_code, barcode, ...rest } = product;
+    setEditingProduct({ ...rest, item_code: "", barcode: "", name: `نسخة من ${product.name}` });
+    setDialogOpen(true);
+  }
+
   async function handleSave(data) {
     if (editingProduct) {
       await base44.entities.Product.update(editingProduct.id, data);
@@ -122,6 +129,7 @@ export default function Products() {
         data={products}
         onEdit={openEdit}
         onDelete={handleDelete}
+        onCopy={openCopy}
         emptyMessage="لا توجد مواد بعد"
       />
 

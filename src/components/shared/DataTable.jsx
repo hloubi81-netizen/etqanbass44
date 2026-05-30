@@ -3,7 +3,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2, ChevronRight, ChevronLeft, ChevronsRight, ChevronsLeft } from "lucide-react";
+import { Pencil, Trash2, Copy, ChevronRight, ChevronLeft, ChevronsRight, ChevronsLeft } from "lucide-react";
 import EmptyState from "./EmptyState";
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
@@ -18,7 +18,7 @@ function useIsMobile() {
   return mobile;
 }
 
-export default function DataTable({ columns, data, onEdit, onDelete, emptyMessage, pageSize: defaultPageSize = 25 }) {
+export default function DataTable({ columns, data, onEdit, onDelete, onCopy, emptyMessage, pageSize: defaultPageSize = 25 }) {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(defaultPageSize);
   const isMobile = useIsMobile();
@@ -70,8 +70,13 @@ export default function DataTable({ columns, data, onEdit, onDelete, emptyMessag
           <div key={row.id || idx} className="bg-card rounded-xl border border-border p-3 space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-[10px] text-muted-foreground">#{(page - 1) * pageSize + idx + 1}</span>
-              {(onEdit || onDelete) && (
+              {(onEdit || onDelete || onCopy) && (
                 <div className="flex items-center gap-1">
+                  {onCopy && (
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-blue-500 hover:text-blue-600" onClick={() => onCopy(row)} title="نسخ">
+                      <Copy className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
                   {onEdit && (
                     <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onEdit(row)}>
                       <Pencil className="h-3.5 w-3.5" />
@@ -115,8 +120,8 @@ export default function DataTable({ columns, data, onEdit, onDelete, emptyMessag
               {columns.map((col) => (
                 <TableHead key={col.key} className="text-right font-semibold text-xs">{col.label}</TableHead>
               ))}
-              {(onEdit || onDelete) && (
-                <TableHead className="text-right font-semibold text-xs w-24">إجراءات</TableHead>
+              {(onEdit || onDelete || onCopy) && (
+                <TableHead className="text-right font-semibold text-xs w-32">إجراءات</TableHead>
               )}
             </TableRow>
           </TableHeader>
@@ -129,9 +134,14 @@ export default function DataTable({ columns, data, onEdit, onDelete, emptyMessag
                     {col.render ? col.render(row[col.key], row) : row[col.key]}
                   </TableCell>
                 ))}
-                {(onEdit || onDelete) && (
+                {(onEdit || onDelete || onCopy) && (
                   <TableCell>
                     <div className="flex items-center gap-1">
+                      {onCopy && (
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-blue-500 hover:text-blue-600" onClick={() => onCopy(row)} title="نسخ">
+                          <Copy className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
                       {onEdit && (
                         <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onEdit(row)}>
                           <Pencil className="h-3.5 w-3.5" />
