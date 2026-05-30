@@ -1,5 +1,4 @@
 import { Toaster } from "@/components/ui/toaster"
-import { useState } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
@@ -64,23 +63,11 @@ import About from './pages/About';
 import UserGuide from './pages/UserGuide';
 import Contact from './pages/Contact';
 import Messages from './pages/Messages';
-import Onboarding from './pages/Onboarding';
-import { base44 } from '@/api/base44Client';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
-  const [checkingOnboarding, setCheckingOnboarding] = useState(true);
-  const [onboardingDone, setOnboardingDone] = useState(true);
 
-  useState(() => {
-    base44.entities.AppSettings.list().then((list) => {
-      const done = list.length > 0 && list[0].onboarding_completed;
-      setOnboardingDone(done);
-      setCheckingOnboarding(false);
-    }).catch(() => setCheckingOnboarding(false));
-  });
-
-  if (isLoadingPublicSettings || isLoadingAuth || checkingOnboarding) {
+  if (isLoadingPublicSettings || isLoadingAuth) {
     return (
       <div className="fixed inset-0 flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
@@ -95,14 +82,6 @@ const AuthenticatedApp = () => {
       navigateToLogin();
       return null;
     }
-  }
-
-  if (!onboardingDone) {
-    return (
-      <Routes>
-        <Route path="*" element={<Onboarding />} />
-      </Routes>
-    );
   }
 
   return (
