@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import MobileNav from "./MobileNav";
@@ -10,6 +10,7 @@ import ThemePicker from "./ThemePicker";
 import { base44 } from "@/api/base44Client";
 import GlobalSearch from "./GlobalSearch";
 import { cn } from "@/lib/utils";
+import { useStockNotifications } from "@/hooks/useStockNotifications";
 
 export default function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -19,6 +20,7 @@ export default function AppLayout() {
   const navigate = useNavigate();
   const prevPathRef = useRef(location.pathname);
   const [pageClass, setPageClass] = useState("page-enter");
+  const { unreadCount } = useStockNotifications();
 
   const isRoot = location.pathname === "/";
 
@@ -99,8 +101,16 @@ export default function AppLayout() {
                 <span className="hidden sm:inline mr-1">{lang === 'ar' ? 'EN' : 'AR'}</span>
               </Button>
 
-              <button className="relative p-1.5 rounded hover:bg-gray-100 dark:hover:bg-muted text-gray-500 dark:text-muted-foreground">
+              <button
+                onClick={() => navigate("/notifications")}
+                className="relative p-1.5 rounded hover:bg-gray-100 dark:hover:bg-muted text-gray-500 dark:text-muted-foreground"
+              >
                 <Bell className="h-[18px] w-[18px]" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[9px] font-bold rounded-full h-4 w-4 flex items-center justify-center leading-none">
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </span>
+                )}
               </button>
 
               {/* User pill */}

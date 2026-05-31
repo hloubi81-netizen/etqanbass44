@@ -7,8 +7,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Bell, BellOff, Plus, Check, Trash2 } from "lucide-react";
+import { Bell, BellOff, Plus, Check, Trash2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import { useStockNotifications } from "@/hooks/useStockNotifications";
 
 const TYPE_ICONS = {
   "فاتورة مستحقة": "🧾", "تجاوز ميزانية": "⚠️", "تنبيه مخزون": "📦",
@@ -27,6 +28,8 @@ export default function NotificationsCenter() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState(emptyForm());
   const [filter, setFilter] = useState("الكل");
+  const [checking, setChecking] = useState(false);
+  const { runStockCheck } = useStockNotifications();
 
   useEffect(() => { loadData(); }, []);
 
@@ -48,6 +51,14 @@ export default function NotificationsCenter() {
   async function markRead(n) {
     await base44.entities.Notification.update(n.id, { ...n, is_read: true });
     loadData();
+  }
+
+  async function handleStockCheck() {
+    setChecking(true);
+    await runStockCheck();
+    await loadData();
+    setChecking(false);
+    toast.success("تم فحص مستويات المخزون");
   }
 
   async function markAllRead() {
@@ -83,7 +94,11 @@ export default function NotificationsCenter() {
             <p className="text-muted-foreground text-sm">{unreadCount} إشعار غير مقروء</p>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          <Button variant="outline" onClick={handleStockCheck} disabled={checking} className="gap-1.5">
+            <RefreshCw className={`h-4 w-4 ${checking ? "animate-spin" : ""}`} />
+            فحص المخزون
+          </Button>
           {unreadCount > 0 && <Button variant="outline" onClick={markAllRead}><Check className="h-4 w-4 ml-1" />تعليم الكل كمقروء</Button>}
           <Button onClick={() => { setForm(emptyForm()); setDialogOpen(true); }}><Plus className="h-4 w-4 ml-1" />إشعار جديد</Button>
         </div>
