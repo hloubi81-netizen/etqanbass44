@@ -6,13 +6,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil, Trash2, GitBranch, Building2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Plus, Pencil, Trash2, GitBranch, Building2, Warehouse, X } from "lucide-react";
 import { toast } from "sonner";
 
-const empty = { name: "", code: "", location: "", manager_name: "", phone: "", is_main: false, notes: "" };
+const empty = { name: "", code: "", location: "", manager_name: "", phone: "", is_main: false, warehouse_ids: [], notes: "" };
 
 export default function Branches() {
   const [branches, setBranches] = useState([]);
+  const [warehouses, setWarehouses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(empty);
@@ -22,13 +24,27 @@ export default function Branches() {
 
   async function load() {
     setLoading(true);
-    const data = await base44.entities.Branch.list();
+    const [data, wh] = await Promise.all([
+      base44.entities.Branch.list(),
+      base44.entities.Warehouse.list()
+    ]);
     setBranches(data);
+    setWarehouses(wh);
     setLoading(false);
   }
 
-  function openNew() { setForm(empty); setEditId(null); setOpen(true); }
-  function openEdit(b) { setForm({ ...b }); setEditId(b.id); setOpen(true); }
+  function addWarehouse(whId) {
+    if (!whId || form.warehouse_ids.includes(whId)) return;
+    if (form.warehouse_ids.length >= 3) return toast.error("الحد الأقصى 3 مستودعات لكل فرع");
+    setForm(f => ({ ...f, warehouse_ids: [...f.warehouse_ids, whId] }));
+  }
+
+  function removeWarehouse(whId) {
+    setForm(f => ({ ...f, warehouse_ids: f.warehouse_ids.filter(id => id !== whId) }));
+  }
+
+  function openNew() { setForm({ ...empty, warehouse_ids: [] }); setEditId(null); setOpen(true); }
+  function openEdit(b) { setForm({ ...b, warehouse_ids: b.warehouse_ids || [] }); setEditId(b.id); setOpen(true); }
 
   async function save() {
     if (!form.name || !form.code) return toast.error("اسم الفرع والرمز مطلوبان");
@@ -91,6 +107,17 @@ export default function Branches() {
                 {b.location && <p className="text-muted-foreground">📍 {b.location}</p>}
                 {b.manager_name && <p className="text-muted-foreground">👤 {b.manager_name}</p>}
                 {b.phone && <p className="text-muted-foreground">📞 {b.phone}</p>}
+                {b.warehouse_ids?.length > 0 && (
+                  <div className="mt-2">
+                    <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1"><Warehouse className="h-3 w-3"/>المستودعات:</p>
+                    <div className="flex flex-wrap gap-1">
+                      {b.warehouse_ids.map(wid => {
+                        const wh = warehouses.find(w => w.id === wid);
+                        return wh ? <Badge key={wid} variant="secondary" className="text-xs">{wh.name}</Badge> : null;
+                      })}
+                    </div>
+                  </div>
+                )}
                 {b.notes && <p className="text-muted-foreground text-xs mt-2">{b.notes}</p>}
                 <div className="flex gap-2 pt-3 border-t mt-3">
                   <Button size="sm" variant="outline" className="flex-1 gap-1" onClick={() => openEdit(b)}>
@@ -135,6 +162,32 @@ export default function Branches() {
             <div className="space-y-1.5 flex items-center gap-2 pt-5">
               <input type="checkbox" id="is_main" checked={form.is_main} onChange={e => setForm({...form, is_main: e.target.checked})} className="h-4 w-4"/>
               <Label htmlFor="is_main">الفرع الرئيسي</Label>
+            </div>
+            <div className="col-span-2 space-y-1.5">
+              <Label className="flex items-center gap-1"><Warehouse className="h-3.5 w-3.5"/>المستودعات المرتبطة (حتى 3)</Label>
+              <Select onValueChange={addWarehouse} value="">
+                <SelectTrigger disabled={form.warehouse_ids.length >= 3}>
+                  <SelectValue placeholder={form.warehouse_ids.length >= 3 ? "وصلت للحد الأقصى" : "اختر مستودعاً لإضافته"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {warehouses.filter(w => !form.warehouse_ids.includes(w.id)).map(w => (
+                    <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {form.warehouse_ids.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {form.warehouse_ids.map(wid => {
+                    const wh = warehouses.find(w => w.id === wid);
+                    return wh ? (
+                      <span key={wid} className="flex items-center gap-1 bg-secondary text-secondary-foreground px-2 py-1 rounded-md text-xs">
+                        {wh.name}
+                        <button type="button" onClick={() => removeWarehouse(wid)} className="hover:text-destructive"><X className="h-3 w-3"/></button>
+                      </span>
+                    ) : null;
+                  })}
+                </div>
+              )}
             </div>
             <div className="col-span-2 space-y-1.5">
               <Label>ملاحظات</Label>
