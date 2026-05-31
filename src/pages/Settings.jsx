@@ -64,6 +64,7 @@ const DEFAULT_SETTINGS = {
   pos: { cashierName: "", enableDiscount: true, maxDiscountPercent: 20, enableTax: true, taxRate: 15, printReceipt: true, receiptNote: "" },
   hr: { workDaysPerWeek: 5, workHoursPerDay: 8, overtimeRate: 1.5, currency: "SAR", payrollDay: 25 },
   assets: { defaultDepreciationMethod: "القسط الثابت", defaultUsefulLife: 5, fiscalYearEnd: "12-31" },
+  security: { activityLog: true, sessionTimeout: false, sessionTimeoutMinutes: 30 },
 };
 
 function ToggleRow({ label, desc, value, onChange }) {
@@ -377,21 +378,58 @@ export default function Settings() {
         return (
           <div className="space-y-4">
             <SectionHeader title="الأمان والخصوصية" desc="إعدادات الحماية والوصول" />
-            <div className="space-y-3">
-              {[
-                { label: "المصادقة الثنائية", desc: "طبقة حماية إضافية عند تسجيل الدخول" },
-                { label: "سجل النشاط", desc: "تتبع جميع العمليات المُنفَّذة في النظام" },
-                { label: "انتهاء صلاحية الجلسة", desc: "تسجيل الخروج التلقائي بعد فترة خمول" },
-              ].map((item, i) => (
-                <div key={i} className="flex items-center justify-between p-4 rounded-xl border bg-muted/30">
-                  <div>
-                    <p className="font-medium text-sm">{item.label}</p>
-                    <p className="text-xs text-muted-foreground">{item.desc}</p>
-                  </div>
-                  <Badge variant="outline">قريباً</Badge>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between p-4 rounded-xl border bg-muted/30">
+                <div>
+                  <p className="font-medium text-sm">المصادقة الثنائية</p>
+                  <p className="text-xs text-muted-foreground">طبقة حماية إضافية عند تسجيل الدخول</p>
                 </div>
-              ))}
+                <Badge variant="outline">قريباً</Badge>
+              </div>
+              <ToggleRow
+                label="سجل النشاط"
+                desc="تتبع وتسجيل جميع العمليات المُنفَّذة في النظام"
+                value={s.security?.activityLog ?? true}
+                onChange={v => update("security", "activityLog", v)}
+              />
+              {s.security?.activityLog !== false && (
+                <div className="mr-4">
+                  <Button variant="outline" size="sm" className="gap-2 w-full" onClick={() => navigate("/reports/activity-log")}>
+                    <ExternalLink className="h-3.5 w-3.5" />
+                    عرض سجل النشاط
+                  </Button>
+                </div>
+              )}
+              <ToggleRow
+                label="انتهاء صلاحية الجلسة التلقائي"
+                desc="تسجيل الخروج تلقائياً بعد فترة خمول"
+                value={s.security?.sessionTimeout ?? false}
+                onChange={v => update("security", "sessionTimeout", v)}
+              />
+              {s.security?.sessionTimeout && (
+                <div className="mr-4">
+                  <FieldRow label="مدة الخمول قبل انتهاء الجلسة">
+                    <div className="flex items-center gap-2">
+                      <select
+                        className="w-40 h-9 px-3 rounded-md border border-input bg-transparent text-sm"
+                        value={s.security?.sessionTimeoutMinutes ?? 30}
+                        onChange={e => update("security", "sessionTimeoutMinutes", +e.target.value)}
+                      >
+                        <option value={15}>15 دقيقة</option>
+                        <option value={30}>30 دقيقة</option>
+                        <option value={60}>ساعة واحدة</option>
+                        <option value={120}>ساعتان</option>
+                        <option value={480}>8 ساعات</option>
+                      </select>
+                    </div>
+                  </FieldRow>
+                </div>
+              )}
             </div>
+            <Button onClick={saveSettings} className="gap-2 w-full">
+              {saved ? <Check className="h-4 w-4" /> : <Save className="h-4 w-4" />}
+              {saved ? "تم الحفظ" : "حفظ الإعدادات"}
+            </Button>
 
             {/* Account Deletion */}
             <div className="mt-6 pt-4 border-t border-destructive/20">
