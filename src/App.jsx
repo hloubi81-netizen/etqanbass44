@@ -99,6 +99,7 @@ const AuthenticatedApp = () => {
   return (
     <Suspense fallback={<PageLoader />}>
     <Routes>
+      <Route path="/contact-us" element={<PublicContact />} />
       <Route element={<AppLayout />}>
         <Route path="/" element={<Dashboard />} />
         <Route path="/groups" element={<Groups />} />
@@ -172,10 +173,7 @@ function App() {
       <SubscriptionProvider>
       <QueryClientProvider client={queryClientInstance}>
         <Router>
-          <Routes>
-            <Route path="/contact-us" element={<Suspense fallback={<PageLoader />}><PublicContact /></Suspense>} />
-            <Route path="*" element={<AuthenticatedApp />} />
-          </Routes>
+          <AuthenticatedApp />
         </Router>
         <Toaster />
       </QueryClientProvider>
