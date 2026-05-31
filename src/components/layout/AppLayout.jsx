@@ -45,23 +45,24 @@ export default function AppLayout() {
         <header className="sticky top-0 z-30 bg-white dark:bg-card border-b border-gray-200 dark:border-border shadow-sm safe-top">
           <div className="flex items-center gap-2 px-4 py-2">
 
-            {/* Mobile: Back button or Hamburger */}
-            {!isRoot ? (
-              <button
-                onClick={() => navigate(-1)}
-                className="lg:hidden p-1.5 rounded hover:bg-gray-100 dark:hover:bg-muted text-gray-600 dark:text-muted-foreground"
-                aria-label="رجوع"
-              >
-                <ArrowRight className="h-5 w-5" />
-              </button>
-            ) : (
+            {/* Mobile: Hamburger + Back button */}
+            <div className="flex items-center gap-1 lg:hidden">
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="lg:hidden p-1.5 rounded hover:bg-gray-100 dark:hover:bg-muted text-gray-600 dark:text-muted-foreground"
+                className="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-muted text-gray-600 dark:text-muted-foreground"
               >
                 <Menu className="h-5 w-5" />
               </button>
-            )}
+              {!isRoot && (
+                <button
+                  onClick={() => navigate(-1)}
+                  className="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-muted text-gray-600 dark:text-muted-foreground"
+                  aria-label="رجوع"
+                >
+                  <ArrowRight className="h-5 w-5" />
+                </button>
+              )}
+            </div>
 
             {/* Desktop hamburger always visible */}
             <button
