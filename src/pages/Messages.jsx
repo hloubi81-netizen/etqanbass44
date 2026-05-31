@@ -9,16 +9,24 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Mail, Send, Inbox, PenSquare, Reply, Trash2, RefreshCw,
-  ChevronLeft, MailOpen, Search
+  ChevronLeft, MailOpen, Search, Headphones, Clock, CheckCircle2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+
+const PRIORITY_COLORS = {
+  "عادي": "bg-secondary text-secondary-foreground",
+  "متوسط": "bg-yellow-100 text-yellow-800",
+  "عاجل": "bg-red-100 text-red-700"
+};
+const STATUS_OPTIONS = ["جديد", "قيد المعالجة", "تم الحل"];
 
 export default function Messages() {
   const [user, setUser] = useState(null);
   const [users, setUsers] = useState([]);
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState("inbox"); // inbox | sent
+  const [tab, setTab] = useState("inbox"); // inbox | sent | support
   const [selected, setSelected] = useState(null);
   const [composing, setComposing] = useState(false);
   const [search, setSearch] = useState("");
@@ -54,11 +62,21 @@ export default function Messages() {
     }
   }, [selected]);
 
-  const inbox = messages.filter(m => m.recipient_email === user?.email);
-  const sent = messages.filter(m => m.sender_email === user?.email);
+  const inbox = messages.filter(m => m.recipient_email === user?.email && m.type !== "support");
+  const sent = messages.filter(m => m.sender_email === user?.email && m.type !== "support");
+  const support = messages.filter(m => m.type === "support");
   const unreadCount = inbox.filter(m => !m.is_read).length;
+  const unreadSupport = support.filter(m => !m.is_read).length;
+  const isAdmin = user?.role === "admin";
 
-  const filtered = (tab === "inbox" ? inbox : sent).filter(m => {
+  const handleStatusChange = async (msg, newStatus) => {
+    await base44.entities.Message.update(msg.id, { status: newStatus });
+    if (selected?.id === msg.id) setSelected({ ...msg, status: newStatus });
+    setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, status: newStatus } : m));
+    toast.success("تم تحديث الحالة");
+  };
+
+  const filtered = (tab === "support" ? support : tab === "inbox" ? inbox : sent).filter(m => {
     const q = search.toLowerCase();
     return !q || m.subject?.toLowerCase().includes(q) || m.sender_name?.toLowerCase().includes(q) || m.recipient_name?.toLowerCase().includes(q);
   });
@@ -138,26 +156,40 @@ export default function Messages() {
       <div className="flex gap-4 flex-1 min-h-0" style={{ height: "calc(100vh - 180px)" }}>
         {/* Sidebar */}
         <div className="w-64 shrink-0 flex flex-col gap-2">
-          <div className="flex rounded-lg border overflow-hidden">
-            <button
-              className={cn("flex-1 py-2 text-sm font-medium transition-colors", tab === "inbox" ? "bg-primary text-white" : "hover:bg-muted")}
-              onClick={() => { setTab("inbox"); setSelected(null); }}
-            >
-              <div className="flex items-center justify-center gap-1.5">
-                <Inbox className="h-3.5 w-3.5" />
-                الوارد
-                {unreadCount > 0 && <span className="bg-white text-primary text-[10px] font-bold rounded-full px-1.5">{unreadCount}</span>}
-              </div>
-            </button>
-            <button
-              className={cn("flex-1 py-2 text-sm font-medium transition-colors", tab === "sent" ? "bg-primary text-white" : "hover:bg-muted")}
-              onClick={() => { setTab("sent"); setSelected(null); }}
-            >
-              <div className="flex items-center justify-center gap-1.5">
-                <Send className="h-3.5 w-3.5" />
-                المُرسَل
-              </div>
-            </button>
+          <div className="flex flex-col rounded-lg border overflow-hidden">
+            <div className="flex">
+              <button
+                className={cn("flex-1 py-2 text-sm font-medium transition-colors", tab === "inbox" ? "bg-primary text-white" : "hover:bg-muted")}
+                onClick={() => { setTab("inbox"); setSelected(null); }}
+              >
+                <div className="flex items-center justify-center gap-1.5">
+                  <Inbox className="h-3.5 w-3.5" />
+                  الوارد
+                  {unreadCount > 0 && <span className={cn("text-[10px] font-bold rounded-full px-1.5", tab === "inbox" ? "bg-white text-primary" : "bg-primary text-white")}>{unreadCount}</span>}
+                </div>
+              </button>
+              <button
+                className={cn("flex-1 py-2 text-sm font-medium transition-colors", tab === "sent" ? "bg-primary text-white" : "hover:bg-muted")}
+                onClick={() => { setTab("sent"); setSelected(null); }}
+              >
+                <div className="flex items-center justify-center gap-1.5">
+                  <Send className="h-3.5 w-3.5" />
+                  المُرسَل
+                </div>
+              </button>
+            </div>
+            {isAdmin && (
+              <button
+                className={cn("py-2 text-sm font-medium transition-colors border-t", tab === "support" ? "bg-orange-500 text-white" : "hover:bg-muted")}
+                onClick={() => { setTab("support"); setSelected(null); }}
+              >
+                <div className="flex items-center justify-center gap-1.5">
+                  <Headphones className="h-3.5 w-3.5" />
+                  طلبات الدعم
+                  {unreadSupport > 0 && <span className={cn("text-[10px] font-bold rounded-full px-1.5", tab === "support" ? "bg-white text-orange-500" : "bg-orange-500 text-white")}>{unreadSupport}</span>}
+                </div>
+              </button>
+            )}
           </div>
 
           <div className="relative">
@@ -219,7 +251,31 @@ export default function Messages() {
                     <span>من: <span className="font-medium text-foreground">{selected.sender_name}</span></span>
                     <span>إلى: <span className="font-medium text-foreground">{selected.recipient_name}</span></span>
                     <span>{fmt(selected.created_date)}</span>
+                    {selected.type === "support" && selected.priority && (
+                      <span className={cn("px-1.5 py-0.5 rounded text-[10px] font-semibold", PRIORITY_COLORS[selected.priority])}>
+                        {selected.priority}
+                      </span>
+                    )}
                   </div>
+                  {selected.type === "support" && isAdmin && (
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className="text-xs text-muted-foreground">الحالة:</span>
+                      {STATUS_OPTIONS.map(s => (
+                        <button
+                          key={s}
+                          onClick={() => handleStatusChange(selected, s)}
+                          className={cn(
+                            "text-xs px-2 py-0.5 rounded-full border transition-colors",
+                            (selected.status || "جديد") === s
+                              ? "bg-primary text-white border-primary"
+                              : "hover:bg-muted border-border"
+                          )}
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleDelete(selected)}>
