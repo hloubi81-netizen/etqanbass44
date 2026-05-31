@@ -8,10 +8,11 @@ import { useLang } from "@/hooks/useLang.jsx";
 import { useTheme } from "@/hooks/useTheme.jsx";
 import { base44 } from "@/api/base44Client";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 import {
   Settings as SettingsIcon, Palette, Globe, Building2, Bell, Shield,
   Database, Receipt, WarehouseIcon, CircleDollarSign, ShoppingCart,
-  UserCog, Landmark, Save, Check, FileCode2, Link2, CheckCircle2, XCircle, AlertCircle, Trash2
+  UserCog, Landmark, Save, Check, FileCode2, CheckCircle2, AlertCircle, Trash2, ExternalLink
 } from "lucide-react";
 import BackupPanel from "@/components/settings/BackupPanel";
 import PrintersManager from "@/components/pos/PrintersManager";
@@ -99,6 +100,7 @@ function FieldRow({ label, children }) {
 export default function Settings() {
   const { lang, setLang } = useLang();
   const { theme, setTheme } = useTheme();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("general");
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [saved, setSaved] = useState(false);
@@ -314,22 +316,60 @@ export default function Settings() {
       case "notifications":
         return (
           <div className="space-y-4">
-            <SectionHeader title="الإشعارات والتنبيهات" desc="ضبط إعدادات الإشعارات" />
-            <div className="space-y-3">
-              {[
-                { label: "تنبيهات الفواتير المتأخرة", desc: "إشعار عند تجاوز فاتورة لتاريخ الاستحقاق" },
-                { label: "تنبيهات المخزون المنخفض", desc: "إشعار عند انخفاض كمية صنف عن الحد الأدنى" },
-                { label: "ملخص يومي", desc: "تقرير يومي بأبرز العمليات" },
-              ].map((item, i) => (
-                <div key={i} className="flex items-center justify-between p-4 rounded-xl border bg-muted/30">
-                  <div>
-                    <p className="font-medium text-sm">{item.label}</p>
-                    <p className="text-xs text-muted-foreground">{item.desc}</p>
+            <SectionHeader title="الإشعارات والتنبيهات" desc="ضبط إعدادات الإشعارات داخل التطبيق" />
+            <div className="space-y-2">
+              <ToggleRow
+                label="تنبيهات المخزون المنخفض"
+                desc="إشعار تلقائي عند وصول كمية صنف إلى الحد الأدنى المحدد"
+                value={s.warehouse.lowStockAlert}
+                onChange={v => { update("warehouse","lowStockAlert",v); localStorage.setItem(SETTINGS_KEY, JSON.stringify({ ...settings, warehouse: { ...settings.warehouse, lowStockAlert: v } })); toast.success(v ? "تم تفعيل تنبيهات المخزون" : "تم إيقاف تنبيهات المخزون"); }}
+              />
+              {s.warehouse.lowStockAlert && (
+                <div className="mr-4 p-4 rounded-xl border border-primary/20 bg-primary/5 space-y-3">
+                  <FieldRow label="حد الكمية الافتراضي للتنبيه">
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        min="0"
+                        className="w-32"
+                        value={s.warehouse.lowStockThreshold}
+                        onChange={e => update("warehouse","lowStockThreshold",+e.target.value)}
+                      />
+                      <span className="text-sm text-muted-foreground">وحدة</span>
+                    </div>
+                  </FieldRow>
+                  <div className="flex items-center gap-2 p-3 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-300 text-xs">
+                    <AlertCircle className="h-4 w-4 shrink-0" />
+                    <span>يمكنك تحديد حد أدنى مختلف لكل منتج ومستودع من صفحة تنبيهات المخزون</span>
                   </div>
-                  <Badge variant="outline">قريباً</Badge>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2 w-full"
+                    onClick={() => navigate("/inventory/stock-alerts")}
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" />
+                    إدارة تنبيهات المخزون
+                  </Button>
                 </div>
-              ))}
+              )}
+              <ToggleRow
+                label="تنبيهات الفواتير المتأخرة"
+                desc="إشعار عند تجاوز فاتورة لتاريخ الاستحقاق"
+                value={false}
+                onChange={() => toast.info("هذه الميزة قيد التطوير")}
+              />
+              <ToggleRow
+                label="ملخص يومي"
+                desc="تقرير يومي بأبرز العمليات"
+                value={false}
+                onChange={() => toast.info("هذه الميزة قيد التطوير")}
+              />
             </div>
+            <Button onClick={saveSettings} className="gap-2 w-full">
+              {saved ? <Check className="h-4 w-4" /> : <Save className="h-4 w-4" />}
+              {saved ? "تم الحفظ" : "حفظ الإعدادات"}
+            </Button>
           </div>
         );
 
