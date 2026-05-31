@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import MobileNav from "./MobileNav";
+import PullToRefresh from "./PullToRefresh";
 import { Menu, Bell, ChevronDown, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLang } from "@/hooks/useLang.jsx";
@@ -120,9 +121,11 @@ export default function AppLayout() {
         </header>
 
         {/* Main content */}
-        <main className={cn("flex-1 p-4 md:p-6 overflow-auto pb-20 lg:pb-6", pageClass)}>
-          <Outlet />
-        </main>
+        <PullToRefresh onRefresh={() => window.location.reload()}>
+          <main className={cn("p-4 md:p-6 pb-24 lg:pb-6 min-h-screen", pageClass)}>
+            <Outlet />
+          </main>
+        </PullToRefresh>
 
         {/* Mobile bottom navigation */}
         <MobileNav />

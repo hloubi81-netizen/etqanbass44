@@ -118,10 +118,26 @@ export default function POS() {
   async function checkout() {
     if (cart.length === 0) { toast.error("السلة فارغة"); return; }
     setSaving(true);
+
+    // Optimistic UI: reset cart immediately for snappy feel
+    const cartSnapshot = [...cart];
+    const discountSnapshot = discountAmt;
+    const totalSnapshot = total;
+    const subtotalSnapshot = subtotal;
+    const paidSnapshot = paidAmt;
+    const changeSnapshot = change;
+    const paymentSnapshot = paymentMethod;
+    const clientSnapshot = clientName;
+
+    setCart([]);
+    setDiscount(0);
+    setPaid("");
+    setClientName("");
+    toast.success("تمت عملية البيع بنجاح");
+
     const sessions = await base44.entities.POSSession.list();
     const num = String(sessions.length + 1).padStart(5, "0");
-    // تحويل البنود للوحدة الأساسية قبل الحفظ
-    const cartWithBase = cart.map((item) => ({
+    const cartWithBase = cartSnapshot.map((item) => ({
       ...item,
       base_quantity: toBaseUnit(item.quantity, { conversion_factor: item.conversion_factor }),
     }));
@@ -129,43 +145,37 @@ export default function POS() {
       session_number: num,
       date: new Date().toISOString().split("T")[0],
       items: cartWithBase,
-      subtotal,
-      discount: discountAmt,
+      subtotal: subtotalSnapshot,
+      discount: discountSnapshot,
       tax: 0,
-      total,
-      paid: paidAmt,
-      change,
-      payment_method: paymentMethod,
-      client_name: clientName,
+      total: totalSnapshot,
+      paid: paidSnapshot,
+      change: changeSnapshot,
+      payment_method: paymentSnapshot,
+      client_name: clientSnapshot,
       status: "مكتملة",
     });
     setLastReceipt(rec);
 
-    // الطباعة على الطابعات المناسبة
     const settings = (() => { try { return JSON.parse(localStorage.getItem("itqan_app_settings") || "{}"); } catch { return {}; } })();
     await printPOSOrder({
-      cart,
+      cart: cartSnapshot,
       products,
       printers,
       orderNumber: num,
       date: new Date().toISOString(),
-      subtotal,
-      discount: discountAmt,
-      total,
-      paid: paidAmt,
-      change,
-      paymentMethod,
-      clientName,
+      subtotal: subtotalSnapshot,
+      discount: discountSnapshot,
+      total: totalSnapshot,
+      paid: paidSnapshot,
+      change: changeSnapshot,
+      paymentMethod: paymentSnapshot,
+      clientName: clientSnapshot,
       companyName: settings?.company?.name || "نقطة البيع",
       receiptNote: settings?.pos?.receiptNote || "شكراً لزيارتكم",
     });
 
-    setCart([]);
-    setDiscount(0);
-    setPaid("");
-    setClientName("");
     setSaving(false);
-    toast.success("تمت عملية البيع بنجاح");
   }
 
   function resetAll() {

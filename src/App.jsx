@@ -2,67 +2,77 @@ import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
 import AppLayout from './components/layout/AppLayout';
-import Dashboard from './pages/Dashboard';
-import Groups from './pages/Groups';
-import Products from './pages/Products';
-import Warehouses from './pages/Warehouses';
-import CostCenters from './pages/CostCenters';
-import Accounts from './pages/Accounts';
-import Currencies from './pages/Currencies';
-import InvoicePatterns from './pages/InvoicePatterns';
-import Invoices from './pages/Invoices';
-import Vouchers from './pages/Vouchers';
-import StockTransfers from './pages/StockTransfers';
-import InventoryCount from './pages/InventoryCount';
-import ProductMovement from './pages/reports/ProductMovement';
-import AccountStatement from './pages/reports/AccountStatement';
-import Ledger from './pages/reports/Ledger';
-import TrialBalance from './pages/reports/TrialBalance';
-import Users from './pages/Users';
-import FinancialDashboard from './pages/financial/FinancialDashboard';
-import Branches from './pages/Branches';
-import BranchReport from './pages/reports/BranchReport';
-import CostManagement from './pages/costs/CostManagement';
-import CostReport from './pages/costs/CostReport';
-import SubscriptionManagement from './pages/SubscriptionManagement';
 import { SubscriptionProvider } from './hooks/useSubscription.jsx';
 import { LangProvider } from './hooks/useLang.jsx';
 import { ThemeProvider } from './hooks/useTheme.jsx';
 import { CurrencyProvider } from './hooks/useCurrency.jsx';
-import IncomeStatement from './pages/financial/IncomeStatement';
-import POS from './pages/pos/POS';
-import POSHistory from './pages/pos/POSHistory';
-import Employees from './pages/hr/Employees';
-import Attendance from './pages/hr/Attendance';
-import Payroll from './pages/hr/Payroll';
-import BalanceSheet from './pages/financial/BalanceSheet';
-import AdvancedReports from './pages/reports/AdvancedReports';
-import FixedAssets from './pages/assets/FixedAssets';
-import CashFlow from './pages/financial/CashFlow';
-import Settings from './pages/Settings';
-import LeaveRequests from './pages/hr/LeaveRequests';
-import BankReconciliation from './pages/accounting/BankReconciliation';
-import StockAlerts from './pages/inventory/StockAlerts';
-import ExpiryTracking from './pages/inventory/ExpiryTracking';
-import BarcodeManagement from './pages/inventory/BarcodeManagement';
-import ActivityLogPage from './pages/reports/ActivityLog';
-import PurchaseOrders from './pages/orders/PurchaseOrders';
-import BudgetManagement from './pages/budget/BudgetManagement';
-import CRM from './pages/crm/CRM';
-import NotificationsCenter from './pages/notifications/NotificationsCenter';
-import CustomReports from './pages/reports/CustomReports';
-import SalesDashboard from './pages/reports/SalesDashboard';
-import LoyaltyProgram from './pages/loyalty/LoyaltyProgram';
-import TaxReport from './pages/reports/TaxReport';
-import About from './pages/About';
-import UserGuide from './pages/UserGuide';
-import Contact from './pages/Contact';
-import Messages from './pages/Messages';
+
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Groups = lazy(() => import('./pages/Groups'));
+const Products = lazy(() => import('./pages/Products'));
+const Warehouses = lazy(() => import('./pages/Warehouses'));
+const CostCenters = lazy(() => import('./pages/CostCenters'));
+const Accounts = lazy(() => import('./pages/Accounts'));
+const Currencies = lazy(() => import('./pages/Currencies'));
+const InvoicePatterns = lazy(() => import('./pages/InvoicePatterns'));
+const Invoices = lazy(() => import('./pages/Invoices'));
+const Vouchers = lazy(() => import('./pages/Vouchers'));
+const StockTransfers = lazy(() => import('./pages/StockTransfers'));
+const InventoryCount = lazy(() => import('./pages/InventoryCount'));
+const ProductMovement = lazy(() => import('./pages/reports/ProductMovement'));
+const AccountStatement = lazy(() => import('./pages/reports/AccountStatement'));
+const Ledger = lazy(() => import('./pages/reports/Ledger'));
+const TrialBalance = lazy(() => import('./pages/reports/TrialBalance'));
+const Users = lazy(() => import('./pages/Users'));
+const FinancialDashboard = lazy(() => import('./pages/financial/FinancialDashboard'));
+const Branches = lazy(() => import('./pages/Branches'));
+const BranchReport = lazy(() => import('./pages/reports/BranchReport'));
+const CostManagement = lazy(() => import('./pages/costs/CostManagement'));
+const CostReport = lazy(() => import('./pages/costs/CostReport'));
+const SubscriptionManagement = lazy(() => import('./pages/SubscriptionManagement'));
+const IncomeStatement = lazy(() => import('./pages/financial/IncomeStatement'));
+const POS = lazy(() => import('./pages/pos/POS'));
+const POSHistory = lazy(() => import('./pages/pos/POSHistory'));
+const Employees = lazy(() => import('./pages/hr/Employees'));
+const Attendance = lazy(() => import('./pages/hr/Attendance'));
+const Payroll = lazy(() => import('./pages/hr/Payroll'));
+const BalanceSheet = lazy(() => import('./pages/financial/BalanceSheet'));
+const AdvancedReports = lazy(() => import('./pages/reports/AdvancedReports'));
+const FixedAssets = lazy(() => import('./pages/assets/FixedAssets'));
+const CashFlow = lazy(() => import('./pages/financial/CashFlow'));
+const Settings = lazy(() => import('./pages/Settings'));
+const LeaveRequests = lazy(() => import('./pages/hr/LeaveRequests'));
+const BankReconciliation = lazy(() => import('./pages/accounting/BankReconciliation'));
+const StockAlerts = lazy(() => import('./pages/inventory/StockAlerts'));
+const ExpiryTracking = lazy(() => import('./pages/inventory/ExpiryTracking'));
+const BarcodeManagement = lazy(() => import('./pages/inventory/BarcodeManagement'));
+const ActivityLogPage = lazy(() => import('./pages/reports/ActivityLog'));
+const PurchaseOrders = lazy(() => import('./pages/orders/PurchaseOrders'));
+const BudgetManagement = lazy(() => import('./pages/budget/BudgetManagement'));
+const CRM = lazy(() => import('./pages/crm/CRM'));
+const NotificationsCenter = lazy(() => import('./pages/notifications/NotificationsCenter'));
+const CustomReports = lazy(() => import('./pages/reports/CustomReports'));
+const SalesDashboard = lazy(() => import('./pages/reports/SalesDashboard'));
+const LoyaltyProgram = lazy(() => import('./pages/loyalty/LoyaltyProgram'));
+const TaxReport = lazy(() => import('./pages/reports/TaxReport'));
+const About = lazy(() => import('./pages/About'));
+const UserGuide = lazy(() => import('./pages/UserGuide'));
+const Contact = lazy(() => import('./pages/Contact'));
+const Messages = lazy(() => import('./pages/Messages'));
+
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center h-64">
+      <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+    </div>
+  );
+}
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -85,6 +95,7 @@ const AuthenticatedApp = () => {
   }
 
   return (
+    <Suspense fallback={<PageLoader />}>
     <Routes>
       <Route element={<AppLayout />}>
         <Route path="/" element={<Dashboard />} />
@@ -145,6 +156,7 @@ const AuthenticatedApp = () => {
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
+    </Suspense>
   );
 };
 
