@@ -10,11 +10,12 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { Crown, Zap, Building2, CheckCircle2, XCircle, Pencil, Plus, LayoutDashboard, List } from "lucide-react";
+import { Crown, Zap, Building2, CheckCircle2, XCircle, Pencil, Plus, LayoutDashboard, List, Trash2 } from "lucide-react";
 import { PLAN_PRESETS, FEATURE_LABELS } from "@/hooks/useSubscription.jsx";
 import PermissionGuard from "@/components/shared/PermissionGuard";
 import { MODULES } from "@/hooks/usePermissions";
 import SubscriptionDashboard from "@/components/subscriptions/SubscriptionDashboard";
+import { useAuth } from "@/lib/AuthContext";
 
 const PLAN_ICONS = { basic: Zap, advanced: Crown, enterprise: Building2 };
 const PLAN_COLORS = { basic: "bg-blue-50 border-blue-200", advanced: "bg-purple-50 border-purple-200", enterprise: "bg-emerald-50 border-emerald-200" };
@@ -31,6 +32,8 @@ const emptyForm = {
 };
 
 export default function SubscriptionManagement() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
   const [subscriptions, setSubscriptions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
@@ -82,6 +85,13 @@ export default function SubscriptionManagement() {
   async function toggleActive(sub) {
     await base44.entities.Subscription.update(sub.id, { is_active: !sub.is_active });
     toast.success(!sub.is_active ? "تم تفعيل الاشتراك" : "تم إيقاف الاشتراك");
+    load();
+  }
+
+  async function cancelSubscription(sub) {
+    if (!window.confirm(`هل أنت متأكد من إلغاء اشتراك "${sub.client_name}"؟`)) return;
+    await base44.entities.Subscription.update(sub.id, { is_active: false });
+    toast.success("تم إلغاء الاشتراك");
     load();
   }
 
@@ -193,10 +203,15 @@ export default function SubscriptionManagement() {
                           <td className="px-4 py-3">
                             <Switch checked={!!s.is_active} onCheckedChange={() => toggleActive(s)} />
                           </td>
-                          <td className="px-4 py-3">
+                          <td className="px-4 py-3 flex items-center gap-1">
                             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(s)}>
                               <Pencil className="h-3.5 w-3.5" />
                             </Button>
+                            {isAdmin && (
+                              <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => cancelSubscription(s)}>
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                            )}
                           </td>
                         </tr>
                       );
