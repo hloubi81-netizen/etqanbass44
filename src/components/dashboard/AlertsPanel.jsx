@@ -16,7 +16,6 @@ export default function AlertsPanel({ lang = "ar" }) {
   }, []);
 
   async function loadAlerts() {
-    try {
     const today = new Date().toISOString().split("T")[0];
     const [invoices, inventoryCounts] = await Promise.all([
       base44.entities.Invoice.filter({ pattern_type: "مبيعات", status: "مرحّلة" }),
@@ -45,10 +44,6 @@ export default function AlertsPanel({ lang = "ar" }) {
     });
     setLowStockItems(lowStock);
     setLoading(false);
-    } catch (err) {
-      // Rate limit or network error — fail silently, panel stays hidden
-      setLoading(false);
-    }
   }
 
   const totalAlerts = overdueInvoices.length + lowStockItems.length;
