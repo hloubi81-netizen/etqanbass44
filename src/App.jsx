@@ -65,6 +65,8 @@ const About = lazy(() => import('./pages/About'));
 const UserGuide = lazy(() => import('./pages/UserGuide'));
 const Contact = lazy(() => import('./pages/Contact'));
 const Messages = lazy(() => import('./pages/Messages'));
+const PublicContact = lazy(() => import('./pages/PublicContact'));
+const SupportRequests = lazy(() => import('./pages/SupportRequests'));
 
 function PageLoader() {
   return (
@@ -97,6 +99,7 @@ const AuthenticatedApp = () => {
   return (
     <Suspense fallback={<PageLoader />}>
     <Routes>
+      <Route path="/contact-us" element={<PublicContact />} />
       <Route element={<AppLayout />}>
         <Route path="/" element={<Dashboard />} />
         <Route path="/groups" element={<Groups />} />
@@ -154,6 +157,7 @@ const AuthenticatedApp = () => {
         <Route path="/contact" element={<Contact />} />
         <Route path="/messages" element={<Messages />} />
       </Route>
+      <Route path="/support-requests" element={<SupportRequests />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
     </Suspense>
