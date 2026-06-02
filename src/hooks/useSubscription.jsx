@@ -77,6 +77,7 @@ export function SubscriptionProvider({ children }) {
 
   function hasFeature(key) {
     if (!subscription) return true; // no subscription = full access (admin mode)
+    if (key === undefined || key === null) return true; // no feature restriction = always show
     return !!(subscription.features?.[key]);
   }
 
