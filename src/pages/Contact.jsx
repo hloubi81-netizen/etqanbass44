@@ -31,8 +31,8 @@ export default function Contact() {
             </div>
             <div>
               <p className="font-semibold text-sm">الهاتف / واتساب</p>
-              <a href="tel:+966500000000" className="text-green-600 text-sm hover:underline">
-                +966 50 000 0000
+              <a href="tel:+201108522982" className="text-green-600 text-sm hover:underline">
+                +20 110 852 2982
               </a>
             </div>
           </CardContent>
