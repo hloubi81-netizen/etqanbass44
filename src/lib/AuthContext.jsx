@@ -21,7 +21,19 @@ export const AuthProvider = ({ children }) => {
     try {
       setIsLoadingPublicSettings(true);
       setAuthError(null);
-      
+
+      // If no appId, skip public settings check and go straight to user auth
+      if (!appParams.appId) {
+        setIsLoadingPublicSettings(false);
+        if (appParams.token) {
+          await checkUserAuth();
+        } else {
+          setIsLoadingAuth(false);
+          setIsAuthenticated(false);
+        }
+        return;
+      }
+
       // First, check app public settings (with token if available)
       // This will tell us if auth is required, user not registered, etc.
       const appClient = createAxiosClient({
@@ -32,9 +44,17 @@ export const AuthProvider = ({ children }) => {
         token: appParams.token, // Include token if available
         interceptResponses: true
       });
+
+      // Add a timeout to prevent infinite loading
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject({ type: 'timeout' }), 8000)
+      );
       
       try {
-        const publicSettings = await appClient.get(`/prod/public-settings/by-id/${appParams.appId}`);
+        const publicSettings = await Promise.race([
+          appClient.get(`/prod/public-settings/by-id/${appParams.appId}`),
+          timeoutPromise
+        ]);
         setAppPublicSettings(publicSettings);
         
         // If we got the app public settings successfully, check if user is authenticated
@@ -46,6 +66,19 @@ export const AuthProvider = ({ children }) => {
         }
         setIsLoadingPublicSettings(false);
       } catch (appError) {
+        // Timeout or network error - try to proceed with user auth anyway
+        if (appError?.type === 'timeout' || appError?.code === 'ERR_NETWORK' || !appError?.status) {
+          console.warn('Public settings unavailable, proceeding with auth check:', appError);
+          setIsLoadingPublicSettings(false);
+          if (appParams.token) {
+            await checkUserAuth();
+          } else {
+            setIsLoadingAuth(false);
+            setIsAuthenticated(false);
+          }
+          return;
+        }
+
         console.error('App state check failed:', appError);
         
         // Handle app-level errors
