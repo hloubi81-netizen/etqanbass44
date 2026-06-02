@@ -162,15 +162,23 @@ const ITEM_FEATURES = {
   "/vouchers/journal": "vouchers", "/vouchers/opening": "vouchers",
   "/groups": "warehouses", "/products": "warehouses", "/warehouses": "warehouses",
   "/transfers": "warehouses", "/inventory-count": "warehouses",
+  "/inventory/stock-alerts": "warehouses", "/inventory/expiry": "warehouses",
+  "/inventory/barcode": "warehouses",
+  "/pos": "invoices", "/pos/history": "invoices",
+  "/orders": "invoices",
   "/costs/management": "costs", "/costs/report": "costs", "/cost-centers": "costs",
   "/branches": "branches", "/reports/branches": "branches",
+  "/accounting/bank-reconciliation": "accounting",
   "/reports/product-movement": "reports", "/reports/client-movement": "reports",
   "/reports/supplier-movement": "reports", "/reports/client-statement": "reports",
   "/reports/supplier-statement": "reports", "/reports/ledger": "reports",
   "/reports/trial-balance": "reports", "/reports/advanced": "reports",
+  "/reports/sales-dashboard": "reports", "/reports/tax": "reports",
+  "/reports/custom": "reports", "/reports/activity-log": "reports",
   "/financial/dashboard": "financial", "/financial/income-statement": "financial",
   "/financial/balance-sheet": "financial", "/financial/cash-flow": "financial",
-  "/users": "users", "/subscriptions": "users"
+  "/budget": "financial",
+  "/users": "users", "/subscriptions": "users",
 };
 
 const ITEM_PERMISSIONS = {
