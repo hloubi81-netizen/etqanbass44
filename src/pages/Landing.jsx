@@ -34,7 +34,7 @@ const plans = [
     id: "basic",
     name: "الباقة الأساسية",
     nameEn: "Basic",
-    price: "99",
+    price: "700",
     duration: "شهرياً",
     badge: null,
     highlight: false,
@@ -53,7 +53,7 @@ const plans = [
     id: "advanced",
     name: "الباقة المتقدمة",
     nameEn: "Advanced",
-    price: "199",
+    price: "900",
     duration: "شهرياً",
     badge: "الأكثر شيوعاً",
     badgeColor: "bg-blue-500",
@@ -74,7 +74,7 @@ const plans = [
     id: "enterprise",
     name: "باقة الشركات",
     nameEn: "Enterprise",
-    price: "399",
+    price: "1500",
     duration: "شهرياً",
     badge: null,
     highlight: false,
@@ -254,7 +254,7 @@ export default function Landing() {
                     ) : (
                       <div>
                         <span className="text-4xl font-black">{plan.price}</span>
-                        <span className="text-muted-foreground text-sm mr-2">ر.س / {plan.duration}</span>
+                        <span className="text-muted-foreground text-sm mr-2">ج.م / {plan.duration}</span>
                       </div>
                     )}
                   </div>
