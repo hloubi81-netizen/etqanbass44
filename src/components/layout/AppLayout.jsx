@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { useStockNotifications } from "@/hooks/useStockNotifications";
 
 export default function AppLayout() {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const { lang, toggle } = useLang();
   const [user, setUser] = useState(null);
   const location = useLocation();
