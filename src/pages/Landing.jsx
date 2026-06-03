@@ -106,7 +106,12 @@ export default function Landing() {
 
   const handleLogin = () => {
     setLoading(true);
-    base44.auth.redirectToLogin(window.location.origin);
+    base44.auth.redirectToLogin(window.location.href);
+  };
+
+  const handleRegister = () => {
+    setLoading(true);
+    base44.auth.redirectToLogin(window.location.href);
   };
 
   return (
@@ -275,9 +280,10 @@ export default function Landing() {
                         : ""
                     }`}
                     variant={plan.highlight ? "default" : "outline"}
-                    onClick={handleLogin}
+                    onClick={handleRegister}
                     disabled={loading}
                   >
+                    {loading ? <span className="w-4 h-4 border-2 border-current/30 border-t-current rounded-full animate-spin" /> : null}
                     {plan.cta}
                   </Button>
                 </CardContent>
