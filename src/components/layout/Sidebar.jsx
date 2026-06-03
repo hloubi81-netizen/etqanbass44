@@ -293,8 +293,8 @@ export default function Sidebar({ isOpen, onToggle }) {
           "w-64 bg-white",
           isRTL ? "right-0 border-l border-gray-200" : "left-0 border-r border-gray-200",
           isRTL ?
-          isOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0" :
-          isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+          isOpen ? "translate-x-0" : "translate-x-full" :
+          isOpen ? "translate-x-0" : "-translate-x-full"
         )}
         style={{ boxShadow: isRTL ? "-2px 0 8px rgba(0,0,0,0.06)" : "2px 0 8px rgba(0,0,0,0.06)" }}>
         
