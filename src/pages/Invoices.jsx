@@ -41,13 +41,18 @@ export default function Invoices() {
 
   async function loadData() {
     setLoading(true);
-    const [data, pats] = await Promise.all([
-      base44.entities.Invoice.filter({ pattern_type: invoiceType }, "-created_date"),
-      base44.entities.InvoicePattern.filter({ type: invoiceType }),
-    ]);
-    setInvoices(data);
-    setPatterns(pats);
-    setLoading(false);
+    try {
+      const [data, pats] = await Promise.all([
+        base44.entities.Invoice.filter({ pattern_type: invoiceType }, "-created_date"),
+        base44.entities.InvoicePattern.filter({ type: invoiceType }),
+      ]);
+      setInvoices(data);
+      setPatterns(pats);
+    } catch {
+      // network error - silently fail
+    } finally {
+      setLoading(false);
+    }
   }
 
   function openNew() {
