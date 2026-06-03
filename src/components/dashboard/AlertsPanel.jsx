@@ -17,10 +17,16 @@ export default function AlertsPanel({ lang = "ar" }) {
 
   async function loadAlerts() {
     const today = new Date().toISOString().split("T")[0];
-    const [invoices, inventoryCounts] = await Promise.all([
-      base44.entities.Invoice.filter({ pattern_type: "مبيعات", status: "مرحّلة" }),
-      base44.entities.InventoryCount.filter({ status: "معتمد" }),
-    ]);
+    let invoices = [], inventoryCounts = [];
+    try {
+      [invoices, inventoryCounts] = await Promise.all([
+        base44.entities.Invoice.filter({ pattern_type: "مبيعات", status: "مرحّلة" }),
+        base44.entities.InventoryCount.filter({ status: "معتمد" }),
+      ]);
+    } catch {
+      setLoading(false);
+      return;
+    }
 
     // Overdue: sales invoices with remaining amount > 0 and date is past
     const overdue = invoices.filter(
