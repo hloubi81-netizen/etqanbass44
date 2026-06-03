@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Trash2, Zap, Link2 } from "lucide-react";
+import { Plus, Trash2, Zap } from "lucide-react";
 import { refreshAccountBalances } from "@/utils/journalEngine";
 import { toast } from "sonner";
 import AccountSearchInput from "@/components/shared/AccountSearchInput";
@@ -14,8 +14,6 @@ import AccountSearchInput from "@/components/shared/AccountSearchInput";
 export default function VoucherForm({ open, onClose, onSave, voucher, voucherType }) {
   const [accounts, setAccounts] = useState([]);
   const [currencies, setCurrencies] = useState([]);
-  const [invoices, setInvoices] = useState([]);
-  const [costCenters, setCostCenters] = useState([]);
   const isJournal = voucherType === "سند قيد" || voucherType === "سند قيد افتتاحي" || voucherType === "سند يومية";
 
   const [form, setForm] = useState({
@@ -34,10 +32,6 @@ export default function VoucherForm({ open, onClose, onSave, voucher, voucherTyp
     total_debit: voucher?.total_debit || 0,
     total_credit: voucher?.total_credit || 0,
     status: voucher?.status || "مسودة",
-    invoice_id: voucher?.invoice_id || "",
-    invoice_number: voucher?.invoice_number || "",
-    cost_center_id: voucher?.cost_center_id || "",
-    cost_center_name: voucher?.cost_center_name || "",
   });
 
   useEffect(() => {
@@ -45,18 +39,13 @@ export default function VoucherForm({ open, onClose, onSave, voucher, voucherTyp
   }, []);
 
   async function loadData() {
-    const [accs, currs, existingVouchers, invs, ccs] = await Promise.all([
+    const [accs, currs, existingVouchers] = await Promise.all([
       base44.entities.Account.list(),
       base44.entities.Currency.list(),
       base44.entities.Voucher.filter({ type: voucherType }),
-      base44.entities.Invoice.list("-date", 200),
-      base44.entities.CostCenter.list(),
     ]);
     setAccounts(accs);
     setCurrencies(currs);
-    setCostCenters(ccs);
-    // فقط فواتير المبيعات والمشتريات
-    setInvoices(invs.filter(i => i.pattern_type === "مبيعات" || i.pattern_type === "مشتريات"));
     if (!voucher) {
       const cashAccount = accs.find((a) => a.name?.includes("صندوق"));
       setForm((prev) => ({
@@ -158,70 +147,6 @@ export default function VoucherForm({ open, onClose, onSave, voucher, voucherTyp
                 <Label>المبلغ</Label>
                 <Input type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: parseFloat(e.target.value) || 0 })} />
               </div>
-              {/* ربط بفاتورة */}
-              {!isJournal && (
-                <div>
-                  <Label className="flex items-center gap-1"><Link2 className="h-3.5 w-3.5" /> ربط بفاتورة (اختياري)</Label>
-                  <Select
-                    value={form.invoice_id || "none"}
-                    onValueChange={(v) => {
-                      if (v === "none") {
-                        setForm({ ...form, invoice_id: "", invoice_number: "", cost_center_id: "", cost_center_name: "" });
-                      } else {
-                        const inv = invoices.find(i => i.id === v);
-                        // ربط مركز التكلفة تلقائياً من الفاتورة
-                        const cc = inv?.cost_center_id ? costCenters.find(c => c.id === inv.cost_center_id) : null;
-                        setForm({
-                          ...form,
-                          invoice_id: v,
-                          invoice_number: inv?.invoice_number || "",
-                          cost_center_id: inv?.cost_center_id || form.cost_center_id,
-                          cost_center_name: cc?.name || inv?.cost_center_name || form.cost_center_name,
-                        });
-                      }
-                    }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="اختر الفاتورة المرتبطة..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">— بدون ربط —</SelectItem>
-                      {invoices.map((inv) => (
-                        <SelectItem key={inv.id} value={inv.id}>
-                          {inv.invoice_number} — {inv.pattern_type} — {inv.client_name || ""}
-                          {inv.total ? ` — ${inv.total.toLocaleString()}` : ""}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {form.invoice_id && (
-                    <p className="text-xs text-emerald-600 mt-1 flex items-center gap-1">
-                      <Link2 className="h-3 w-3" /> مرتبط بالفاتورة رقم {form.invoice_number}
-                    </p>
-                  )}
-                </div>
-              )}
-              <div>
-                <Label>مركز التكلفة</Label>
-                <Select
-                  value={form.cost_center_id || "none"}
-                  onValueChange={(v) => {
-                    const cc = costCenters.find(c => c.id === v);
-                    setForm({ ...form, cost_center_id: v === "none" ? "" : v, cost_center_name: cc?.name || "" });
-                  }}
-                >
-                  <SelectTrigger><SelectValue placeholder="اختر مركز التكلفة (اختياري)" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">— بدون مركز تكلفة —</SelectItem>
-                    {costCenters.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {form.cost_center_name && (
-                  <p className="text-xs text-emerald-600 mt-1">✓ مرتبط بـ: {form.cost_center_name}</p>
-                )}
-              </div>
               <div>
                 <Label>البيان</Label>
                 <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
@@ -278,27 +203,6 @@ export default function VoucherForm({ open, onClose, onSave, voucher, voucherTyp
                   )}
                 </div>
               )}
-              <div>
-                <Label>مركز التكلفة</Label>
-                <Select
-                  value={form.cost_center_id || "none"}
-                  onValueChange={(v) => {
-                    const cc = costCenters.find(c => c.id === v);
-                    setForm({ ...form, cost_center_id: v === "none" ? "" : v, cost_center_name: cc?.name || "" });
-                  }}
-                >
-                  <SelectTrigger><SelectValue placeholder="اختر مركز التكلفة (اختياري)" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">— بدون مركز تكلفة —</SelectItem>
-                    {costCenters.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {form.cost_center_name && (
-                  <p className="text-xs text-emerald-600 mt-1">✓ مرتبط بـ: {form.cost_center_name}</p>
-                )}
-              </div>
               <div>
                 <Label>البيان</Label>
                 <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
