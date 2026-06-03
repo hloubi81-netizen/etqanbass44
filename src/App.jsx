@@ -65,6 +65,7 @@ const About = lazy(() => import('./pages/About'));
 const UserGuide = lazy(() => import('./pages/UserGuide'));
 const Contact = lazy(() => import('./pages/Contact'));
 const Messages = lazy(() => import('./pages/Messages'));
+const Landing = lazy(() => import('./pages/Landing'));
 
 function PageLoader() {
   return (
@@ -75,7 +76,7 @@ function PageLoader() {
 }
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated } = useAuth();
 
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
@@ -85,13 +86,19 @@ const AuthenticatedApp = () => {
     );
   }
 
-  if (authError) {
-    if (authError.type === 'user_not_registered') {
-      return <UserNotRegisteredError />;
-    } else if (authError.type === 'auth_required') {
-      navigateToLogin();
-      return null;
-    }
+  if (authError?.type === 'user_not_registered') {
+    return <UserNotRegisteredError />;
+  }
+
+  // If not authenticated, show Landing page for all routes
+  if (!isAuthenticated) {
+    return (
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route path="*" element={<Landing />} />
+        </Routes>
+      </Suspense>
+    );
   }
 
   return (
