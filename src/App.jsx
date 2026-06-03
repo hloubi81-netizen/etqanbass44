@@ -46,6 +46,7 @@ const BalanceSheet = lazy(() => import('./pages/financial/BalanceSheet'));
 const AdvancedReports = lazy(() => import('./pages/reports/AdvancedReports'));
 const FixedAssets = lazy(() => import('./pages/assets/FixedAssets'));
 const CashFlow = lazy(() => import('./pages/financial/CashFlow'));
+const LiquidityDashboard = lazy(() => import('./pages/financial/LiquidityDashboard'));
 const Settings = lazy(() => import('./pages/Settings'));
 const LeaveRequests = lazy(() => import('./pages/hr/LeaveRequests'));
 const BankReconciliation = lazy(() => import('./pages/accounting/BankReconciliation'));
@@ -129,6 +130,7 @@ const AuthenticatedApp = () => {
         <Route path="/financial/income-statement" element={<IncomeStatement />} />
         <Route path="/financial/balance-sheet" element={<BalanceSheet />} />
         <Route path="/financial/cash-flow" element={<CashFlow />} />
+        <Route path="/financial/liquidity" element={<LiquidityDashboard />} />
         <Route path="/branches" element={<Branches />} />
         <Route path="/reports/branches" element={<BranchReport />} />
         <Route path="/costs/management" element={<CostManagement />} />

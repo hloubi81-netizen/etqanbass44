@@ -89,6 +89,7 @@ function getMenuItems(lang) {
     { label: l('incomeStatement'), path: "/financial/income-statement", icon: BarChart3 },
     { label: l('balanceSheet'), path: "/financial/balance-sheet", icon: Scale },
     { label: l('cashFlow'), path: "/financial/cash-flow", icon: Coins },
+    { label: lang === 'ar' ? "السيولة النقدية" : "Liquidity Monitor", path: "/financial/liquidity", icon: Landmark },
     { label: lang === 'ar' ? "الميزانية والتخطيط" : "Budget & Planning", path: "/budget", icon: PieChart }]
 
   },
