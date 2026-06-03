@@ -109,6 +109,11 @@ export default function Landing() {
     base44.auth.redirectToLogin(window.location.origin);
   };
 
+  const handleFreeTrial = () => {
+    setLoading(true);
+    base44.auth.redirectToLogin("/");
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground" dir="rtl">
       {/* Navbar */}
@@ -275,7 +280,7 @@ export default function Landing() {
                         : ""
                     }`}
                     variant={plan.highlight ? "default" : "outline"}
-                    onClick={handleLogin}
+                    onClick={plan.id === "trial" ? handleFreeTrial : handleLogin}
                     disabled={loading}
                   >
                     {plan.cta}
