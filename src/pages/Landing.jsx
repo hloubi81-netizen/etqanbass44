@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -102,16 +102,13 @@ const features = [
 ];
 
 export default function Landing() {
-  const [loading, setLoading] = useState(false);
 
   const handleLogin = () => {
-    setLoading(true);
-    base44.auth.redirectToLogin(window.location.href);
+    base44.auth.redirectToLogin();
   };
 
   const handleRegister = () => {
-    setLoading(true);
-    base44.auth.redirectToLogin(window.location.href);
+    base44.auth.redirectToLogin();
   };
 
   return (
@@ -131,12 +128,8 @@ export default function Landing() {
           <div className="flex items-center gap-3">
             <a href="#plans" className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:block">الباقات</a>
             <a href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors hidden sm:block">المميزات</a>
-            <Button onClick={handleLogin} disabled={loading} className="gap-2">
-              {loading ? (
-                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <ArrowLeft className="w-4 h-4" />
-              )}
+            <Button onClick={handleLogin} className="gap-2">
+              <ArrowLeft className="w-4 h-4" />
               دخول النظام
             </Button>
           </div>
@@ -172,7 +165,6 @@ export default function Landing() {
               variant="outline"
               className="text-base px-8 gap-2"
               onClick={handleLogin}
-              disabled={loading}
             >
               <ArrowLeft className="w-5 h-5" />
               دخول النظام
@@ -281,9 +273,7 @@ export default function Landing() {
                     }`}
                     variant={plan.highlight ? "default" : "outline"}
                     onClick={handleRegister}
-                    disabled={loading}
                   >
-                    {loading ? <span className="w-4 h-4 border-2 border-current/30 border-t-current rounded-full animate-spin" /> : null}
                     {plan.cta}
                   </Button>
                 </CardContent>
@@ -326,11 +316,7 @@ export default function Landing() {
             size="lg"
             className="bg-white text-primary hover:bg-blue-50 text-base px-10 font-bold"
             onClick={handleLogin}
-            disabled={loading}
           >
-            {loading ? (
-              <span className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin ml-2" />
-            ) : null}
             سجّل الآن — مجاناً
           </Button>
         </div>
@@ -346,7 +332,7 @@ export default function Landing() {
             <span className="font-semibold text-foreground">ETQAN ERP</span>
           </div>
           <p>© 2025 ETQAN ERP. جميع الحقوق محفوظة.</p>
-          <Button variant="outline" size="sm" onClick={handleLogin} disabled={loading}>
+          <Button variant="outline" size="sm" onClick={handleLogin}>
             دخول النظام
           </Button>
         </div>
