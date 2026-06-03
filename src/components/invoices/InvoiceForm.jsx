@@ -231,7 +231,12 @@ export default function InvoiceForm({ open, onClose, onSave, invoice, invoiceTyp
                 value={form.branch_id}
                 onValueChange={(v) => {
                   const br = branches.find((b) => b.id === v);
-                  setForm({ ...form, branch_id: v, branch_name: br?.name || "" });
+                  // ربط مركز التكلفة تلقائياً من الفرع
+                  const autoCcId = br?.cost_center_id || form.cost_center_id;
+                  const autoCcName = br?.cost_center_id
+                    ? (costCenters.find(c => c.id === br.cost_center_id)?.name || br.cost_center_name || "")
+                    : form.cost_center_name;
+                  setForm({ ...form, branch_id: v, branch_name: br?.name || "", cost_center_id: autoCcId, cost_center_name: autoCcName });
                 }}
               >
                 <SelectTrigger><SelectValue placeholder="اختر الفرع" /></SelectTrigger>

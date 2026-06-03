@@ -15,6 +15,7 @@ export default function VoucherForm({ open, onClose, onSave, voucher, voucherTyp
   const [accounts, setAccounts] = useState([]);
   const [currencies, setCurrencies] = useState([]);
   const [invoices, setInvoices] = useState([]);
+  const [costCenters, setCostCenters] = useState([]);
   const isJournal = voucherType === "سند قيد" || voucherType === "سند قيد افتتاحي" || voucherType === "سند يومية";
 
   const [form, setForm] = useState({
@@ -35,6 +36,8 @@ export default function VoucherForm({ open, onClose, onSave, voucher, voucherTyp
     status: voucher?.status || "مسودة",
     invoice_id: voucher?.invoice_id || "",
     invoice_number: voucher?.invoice_number || "",
+    cost_center_id: voucher?.cost_center_id || "",
+    cost_center_name: voucher?.cost_center_name || "",
   });
 
   useEffect(() => {
@@ -42,14 +45,16 @@ export default function VoucherForm({ open, onClose, onSave, voucher, voucherTyp
   }, []);
 
   async function loadData() {
-    const [accs, currs, existingVouchers, invs] = await Promise.all([
+    const [accs, currs, existingVouchers, invs, ccs] = await Promise.all([
       base44.entities.Account.list(),
       base44.entities.Currency.list(),
       base44.entities.Voucher.filter({ type: voucherType }),
       base44.entities.Invoice.list("-date", 200),
+      base44.entities.CostCenter.list(),
     ]);
     setAccounts(accs);
     setCurrencies(currs);
+    setCostCenters(ccs);
     // فقط فواتير المبيعات والمشتريات
     setInvoices(invs.filter(i => i.pattern_type === "مبيعات" || i.pattern_type === "مشتريات"));
     if (!voucher) {
@@ -161,10 +166,18 @@ export default function VoucherForm({ open, onClose, onSave, voucher, voucherTyp
                     value={form.invoice_id || "none"}
                     onValueChange={(v) => {
                       if (v === "none") {
-                        setForm({ ...form, invoice_id: "", invoice_number: "" });
+                        setForm({ ...form, invoice_id: "", invoice_number: "", cost_center_id: "", cost_center_name: "" });
                       } else {
                         const inv = invoices.find(i => i.id === v);
-                        setForm({ ...form, invoice_id: v, invoice_number: inv?.invoice_number || "" });
+                        // ربط مركز التكلفة تلقائياً من الفاتورة
+                        const cc = inv?.cost_center_id ? costCenters.find(c => c.id === inv.cost_center_id) : null;
+                        setForm({
+                          ...form,
+                          invoice_id: v,
+                          invoice_number: inv?.invoice_number || "",
+                          cost_center_id: inv?.cost_center_id || form.cost_center_id,
+                          cost_center_name: cc?.name || inv?.cost_center_name || form.cost_center_name,
+                        });
                       }
                     }}
                   >
@@ -188,6 +201,27 @@ export default function VoucherForm({ open, onClose, onSave, voucher, voucherTyp
                   )}
                 </div>
               )}
+              <div>
+                <Label>مركز التكلفة</Label>
+                <Select
+                  value={form.cost_center_id || "none"}
+                  onValueChange={(v) => {
+                    const cc = costCenters.find(c => c.id === v);
+                    setForm({ ...form, cost_center_id: v === "none" ? "" : v, cost_center_name: cc?.name || "" });
+                  }}
+                >
+                  <SelectTrigger><SelectValue placeholder="اختر مركز التكلفة (اختياري)" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">— بدون مركز تكلفة —</SelectItem>
+                    {costCenters.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {form.cost_center_name && (
+                  <p className="text-xs text-emerald-600 mt-1">✓ مرتبط بـ: {form.cost_center_name}</p>
+                )}
+              </div>
               <div>
                 <Label>البيان</Label>
                 <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
@@ -244,6 +278,27 @@ export default function VoucherForm({ open, onClose, onSave, voucher, voucherTyp
                   )}
                 </div>
               )}
+              <div>
+                <Label>مركز التكلفة</Label>
+                <Select
+                  value={form.cost_center_id || "none"}
+                  onValueChange={(v) => {
+                    const cc = costCenters.find(c => c.id === v);
+                    setForm({ ...form, cost_center_id: v === "none" ? "" : v, cost_center_name: cc?.name || "" });
+                  }}
+                >
+                  <SelectTrigger><SelectValue placeholder="اختر مركز التكلفة (اختياري)" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">— بدون مركز تكلفة —</SelectItem>
+                    {costCenters.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {form.cost_center_name && (
+                  <p className="text-xs text-emerald-600 mt-1">✓ مرتبط بـ: {form.cost_center_name}</p>
+                )}
+              </div>
               <div>
                 <Label>البيان</Label>
                 <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
