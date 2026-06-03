@@ -72,6 +72,7 @@ export default function AccountStatement() {
         date: inv.date,
         type: inv.pattern_type,
         number: inv.invoice_number,
+        linked_invoice: null,
         currency: inv.currency,
         exchangeRate: rate,
         debit: isDebit ? total : 0,
@@ -95,6 +96,7 @@ export default function AccountStatement() {
         date: v.date,
         type: v.type,
         number: v.voucher_number,
+        linked_invoice: v.invoice_number || null,
         currency: null,
         exchangeRate: 1,
         debit: isMainAccount ? amount : 0,
@@ -110,6 +112,7 @@ export default function AccountStatement() {
           date: v.date,
           type: v.type,
           number: v.voucher_number,
+          linked_invoice: v.invoice_number || null,
           currency: null,
           exchangeRate: 1,
           debit: entry.debit || 0,
@@ -217,6 +220,7 @@ export default function AccountStatement() {
                 <TableHead className="text-right text-xs">التاريخ</TableHead>
                 <TableHead className="text-right text-xs">نوع العملية</TableHead>
                 <TableHead className="text-right text-xs">الرقم</TableHead>
+                <TableHead className="text-right text-xs">الفاتورة المرتبطة</TableHead>
                 {!showInLocal && hasForeignCurrency && <TableHead className="text-right text-xs">العملة</TableHead>}
                 <TableHead className="text-right text-xs">{showInLocal ? `مدين (${selectedCurrency?.symbol || ""})` : "مدين"}</TableHead>
                 <TableHead className="text-right text-xs">{showInLocal ? `دائن (${selectedCurrency?.symbol || ""})` : "دائن"}</TableHead>
@@ -233,6 +237,15 @@ export default function AccountStatement() {
                     <TableCell className="text-sm">{r.date}</TableCell>
                     <TableCell className="text-sm">{r.type}</TableCell>
                     <TableCell className="text-sm">{r.number}</TableCell>
+                    <TableCell className="text-sm">
+                      {r.linked_invoice ? (
+                        <span className="inline-flex items-center gap-1 bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 rounded px-1.5 py-0.5 text-xs font-medium">
+                          🔗 {r.linked_invoice}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground text-xs">—</span>
+                      )}
+                    </TableCell>
                     {!showInLocal && hasForeignCurrency && (
                       <TableCell className="text-sm text-muted-foreground">{r.currency || "-"}</TableCell>
                     )}
