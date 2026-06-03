@@ -43,9 +43,14 @@ export default function SubscriptionManagement() {
   useEffect(() => { load(); }, []);
 
   async function load() {
-    const list = await base44.entities.Subscription.list("-created_date");
-    setSubscriptions(list);
-    setLoading(false);
+    try {
+      const list = await base44.entities.Subscription.list("-created_date");
+      setSubscriptions(list);
+    } catch {
+      // network error - silently fail
+    } finally {
+      setLoading(false);
+    }
   }
 
   function openNew() {
