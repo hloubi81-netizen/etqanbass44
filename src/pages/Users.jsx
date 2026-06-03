@@ -47,9 +47,14 @@ export default function Users() {
   useEffect(() => { loadUsers(); }, []);
 
   async function loadUsers() {
-    const list = await base44.entities.User.list();
-    setUsers(list);
-    setLoading(false);
+    try {
+      const list = await base44.entities.User.list();
+      setUsers(list);
+    } catch {
+      // network error - silently fail
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function handleInvite() {
