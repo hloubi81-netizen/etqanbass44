@@ -18,8 +18,8 @@ export default function AlertsPanel({ lang = "ar" }) {
   async function loadAlerts() {
     const today = new Date().toISOString().split("T")[0];
     const [invoices, inventoryCounts] = await Promise.all([
-      base44.entities.Invoice.filter({ pattern_type: "مبيعات", status: "مرحّلة" }).catch(() => []),
-      base44.entities.InventoryCount.filter({ status: "معتمد" }).catch(() => []),
+      base44.entities.Invoice.filter({ pattern_type: "مبيعات", status: "مرحّلة" }),
+      base44.entities.InventoryCount.filter({ status: "معتمد" }),
     ]);
 
     // Overdue: sales invoices with remaining amount > 0 and date is past
@@ -45,8 +45,6 @@ export default function AlertsPanel({ lang = "ar" }) {
     setLowStockItems(lowStock);
     setLoading(false);
   }
-
-  // no-op - errors are caught per-call above
 
   const totalAlerts = overdueInvoices.length + lowStockItems.length;
   if (loading || totalAlerts === 0) return null;
