@@ -104,11 +104,11 @@ const features = [
 export default function Landing() {
 
   const handleLogin = () => {
-    base44.auth.redirectToLogin();
+    base44.auth.loginWithProvider('sso', '/');
   };
 
   const handleRegister = () => {
-    base44.auth.redirectToLogin();
+    base44.auth.loginWithProvider('sso', '/');
   };
 
   return (
